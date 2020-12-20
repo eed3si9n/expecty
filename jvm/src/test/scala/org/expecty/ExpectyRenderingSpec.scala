@@ -22,8 +22,8 @@ class ExpectyRenderingSpec {
   val assert = new Expecty() // (printAsts = true)
   val expect = new VarargsExpecty
 
-  def isDotty: Boolean =
-    scala.util.Try(Class.forName("dotty.DottyPredef$")).isSuccess
+  import expecty.Compat.isDotty
+
 
   @Test
   def literals(): Unit = {
@@ -520,4 +520,3 @@ assert(person.age == 43, "something something")
     override def toString = brand + " " + model
   }
 }
-

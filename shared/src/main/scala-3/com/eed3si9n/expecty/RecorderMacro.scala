@@ -44,11 +44,11 @@ object RecorderMacro {
       listener: Expr[RecorderListener[R, A]])(using qctx0: Quotes): Expr[A] = {
     import qctx0.reflect._
     import util._
-    val termArgs: Seq[Term] = recordings.map(Term.of(_).underlyingArgument)
+    val termArgs: Seq[Term] = recordings.map(_.asTerm.underlyingArgument)
 
     def getText(expr: Tree): String = {
       val pos = expr.pos
-      (" " * pos.startColumn) + pos.sourceCode
+      (" " * pos.startColumn) + pos.sourceCode.get
     }
 
     def getSourceLocation(expr: Tree) = {
@@ -65,9 +65,9 @@ object RecorderMacro {
         val relativePath = Expr(pwd.relativize(path).toString())
         val fileName = Expr(file.getName)
 
-        Term.of('{Location(${pathExpr}, ${relativePath}, ${line})})
+        '{Location(${pathExpr}, ${relativePath}, ${line})}.asTerm
       } else {
-        Term.of('{Location("<virtual>", "<virtual>", ${line})})
+        '{Location("<virtual>", "<virtual>", ${line})}.asTerm
       }
     }
 
@@ -81,21 +81,21 @@ object RecorderMacro {
           case sym if sym.isClassDef => sym
         }
         val recordExpressionSel: Term = {
-          val m = runtimeSym.method("recordExpression").head
-          Term.of('{ recorderRuntime }).select(m)
+          val m = runtimeSym.memberMethod("recordExpression").head
+          '{ recorderRuntime }.asTerm.select(m)
         }
         val recordValueSel: Term = {
-          val m = runtimeSym.method("recordValue").head
-          Term.of('{ recorderRuntime }).select(m)
+          val m = runtimeSym.memberMethod("recordValue").head
+          '{ recorderRuntime }.asTerm.select(m)
         }
 
         def recordExpressions(recording: Term): List[Term] = {
           val text = getText(recording)
-          val ast = recording.showExtractors
+          val ast = recording.show(using Printer.TreeStructure)
           val sourceLoc = getSourceLocation(recording)
           try {
             List(
-              Term.of('{ recorderRuntime.resetValues() }),
+              '{ recorderRuntime.resetValues() }.asTerm,
               recordExpression(text, ast, recording, sourceLoc)
             )
           } catch {
@@ -108,8 +108,8 @@ object RecorderMacro {
           val instrumented = recordAllValues(expr)
           Apply(recordExpressionSel,
             List(
-              Literal(Constant.String(text)),
-              Literal(Constant.String(ast)),
+              Literal(StringConstant(text)),
+              Literal(StringConstant(ast)),
               instrumented,
               loc
             ))
@@ -170,7 +170,7 @@ object RecorderMacro {
                 tapply,
                 List(
                   expr,
-                  Literal(Constant.Int(getAnchor(expr)))
+                  Literal(IntConstant(getAnchor(expr)))
                 )
               )
           }
@@ -183,13 +183,13 @@ object RecorderMacro {
             case Apply(x, ys)     => getAnchor(x) + 0
             case TypeApply(x, ys) => getAnchor(x) + 0
             case Select(x, y)     =>
-              expr.pos.startColumn + math.max(0, expr.pos.sourceCode.indexOf(y))
+              expr.pos.startColumn + math.max(0, expr.pos.sourceCode.get.indexOf(y))
             case _                => expr.pos.startColumn
           }
 
         Block(
           termArgs.toList.flatMap(recordExpressions),
-          Term.of('{ recorderRuntime.completeRecording() })
+          '{ recorderRuntime.completeRecording() }.asTerm
         ).asExprOf[A]
       }
     }
