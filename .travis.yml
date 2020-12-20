@@ -13,7 +13,7 @@ matrix:
   include:
     - scala: 2.12.12
       jdk: openjdk11
-    - scala: 3.0.0-M2
+    - scala: 3.0.0-M3
       jdk: openjdk8
       script: sbt ++${TRAVIS_SCALA_VERSION}! expectyJVM/test
     - scala: 2.11.12
