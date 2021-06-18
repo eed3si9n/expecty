@@ -160,7 +160,14 @@ Instrumented AST: ${showRaw(instrumented)}")
         // Inner Apply is the application of the value the extension applies to.
         // Outer Apply is the application of implicit parameters
         Apply(Apply(x, y.map(recordAllValues)), z)
-      case Apply(x, ys)     => Apply(recordAllValues(x), ys.map(recordAllValues))
+      case Apply(x, ys) =>
+        val allParametersAreImplicit =
+          ys.map(x => Option(x.symbol).fold(false)(_.isImplicit)).forall(_ == true)
+
+        if (ys.nonEmpty && allParametersAreImplicit)
+          Apply(recordSubValues(x), ys)
+        else
+          Apply(recordAllValues(x), ys.map(recordAllValues))
       case TypeApply(x, ys) => TypeApply(recordSubValues(x), ys)
       case Select(x, y)     => Select(recordAllValues(x), y)
       case _                => expr

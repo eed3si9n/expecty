@@ -423,8 +423,43 @@ and corrigible authority of this lies in our wills.                          |  
     }
   }
 
+  test("method with an implicit parameter") {
+    trait Eq[T] {
+      def eq(x: T, y: T): Boolean
+    }
+
+    object Eq {
+      implicit val eqInt: Eq[Int] = new Eq[Int] {
+        def eq(x: Int, y: Int) = (x - y) == 0
+      }
+    }
+
+    class Hello {
+      def compare[T: Eq](base: T, other: T) = implicitly[Eq[T]].eq(base, other)
+      override def toString = "Hello"
+    }
+
+    val x = new Hello
+    val y = 30
+
+    outputs(
+      """
+      *assertion failed
+      *
+      *x.compare(15, y) == true
+      *| |           |  |
+      *| false       30 false
+      *Hello
+      """.stripMargin('*')
+    ) {
+      assert1 {
+        x.compare(15, y) == true
+      }
+    }
+  }
+
   def outputs(rendering: String)(expectation: => Unit): Unit = {
-    def normalize(s: String) = augmentString(s.trim()).linesIterator.toList.mkString
+    def normalize(s: String) = s.trim().linesIterator.mkString
 
     try {
       expectation
@@ -437,9 +472,11 @@ and corrigible authority of this lies in our wills.                          |  
           .replaceAll("\u001b\\[[\\d;]*[^\\d;]", "")
         if (actual != expected) {
           throw new AssertionError(s"""Expectation output doesn't match: ${e.getMessage}
-               |expected = $expected
-               |actual   = $actual
-               |""".stripMargin)
+               %expected = 
+               %$expected
+               %actual   = 
+               %$actual
+               %""".stripMargin('%'))
         }
       }
     }

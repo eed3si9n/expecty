@@ -15,7 +15,9 @@
 package foo
 
 object ExpectyTest extends verify.BasicTestSuite {
+  import com.eed3si9n.expecty.Expecty.expect
   val assert1 = com.eed3si9n.expecty.Expecty.assert
+
   import java.lang.AssertionError
 
   val name = "Hi from Expecty!"
@@ -69,5 +71,24 @@ object ExpectyTest extends verify.BasicTestSuite {
     }
 
     assert1("abc".length() === 3)
+
+  }
+
+  test("Method with implicit parameter") {
+    trait Test[T] {
+      def a: T
+    }
+
+    implicit val testInt: Test[Int] = new Test[Int] {
+      def a = 25
+    }
+
+    trait Data {
+      def hello[T: Test](b: T) = (implicitly[Test[T]].a, b)
+    }
+
+    val z = new Data {}
+
+    assert1(z.hello[Int](50) == 25 -> 50)
   }
 }

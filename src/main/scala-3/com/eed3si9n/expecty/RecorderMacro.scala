@@ -130,6 +130,8 @@ class RecorderMacro(using qctx0: Quotes) {
     }
   }
 
+  private[this] def isImplicitParameter(t: Term): Boolean = 
+    t.symbol.flags.is(Flags.Given) || t.symbol.flags.is(Flags.Implicit)
 
   private[this] def recordSubValues(runtime: Term, expr: Term): Term = {
     expr match {
@@ -150,7 +152,11 @@ class RecorderMacro(using qctx0: Quotes) {
         }
       case a @ Apply(x, ys) =>
         try {
-          Apply(recordAllValues(runtime, x), ys.map(recordAllValues(runtime, _)))
+  
+          if(ys.nonEmpty && ys.forall(isImplicitParameter))
+            Apply(recordSubValues(runtime, x), ys)
+          else 
+            Apply(recordSubValues(runtime, x), ys.map(recordAllValues(runtime, _)))
         } catch {
           case e: AssertionError => expr
         }
