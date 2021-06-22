@@ -27,6 +27,4 @@ jobs:
           sudo apt-get update
           sudo apt install clang libunwind-dev libgc-dev libre2-dev
           sbt -v ci-release
-          env SCALAJS_VERSION="0.6.33" CI_RELEASE="clean;expectyJS2_11/publishSigned;expectyJS2_12/publishSigned;expectyJS/publishSigned" sbt -v ci-release
-          env SCALANATIVE_VERSION="0.4.0-M2" CI_RELEASE="clean;expectyNative2_11/publishSigned" sbt -v ci-release
         shell: bash
