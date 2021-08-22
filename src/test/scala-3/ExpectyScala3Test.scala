@@ -64,5 +64,9 @@ object ExpectyScala3Test extends verify.BasicTestSuite {
     assert1(z.hello(50)(using ti2) == 50 -> 50)
     assert1(z.hello(128) == 25 -> 128)
   }
+
+  test("Capturing package names correctly") {
+    assert1(cats.data.Chain(1, 2, 3).size == 3)
+  }
 }
 

@@ -29,6 +29,7 @@ class RecorderMacro(using qctx0: Quotes) {
       listener: Expr[RecorderListener[A, R]])(using qctx0: Quotes): Expr[R] = {
     val termArgs: Seq[Term] = recordings.map(_.asTerm.underlyingArgument)
 
+
     '{
       val recorderRuntime: RecorderRuntime[A, R] = new RecorderRuntime($listener)
       recorderRuntime.recordMessage($message)
@@ -162,7 +163,10 @@ class RecorderMacro(using qctx0: Quotes) {
         }
       // case TypeApply(x, ys) => recordValue(TypeApply.copy(expr)(recordSubValues(x), ys), expr)
       case TypeApply(x, ys) => TypeApply.copy(expr)(recordSubValues(runtime, x), ys)
-      case Select(x, y)     => Select.copy(expr)(recordAllValues(runtime, x), y)
+      case Select(x, y)     => 
+        if(!x.symbol.flags.is(Flags.Package))
+          Select.copy(expr)(recordAllValues(runtime, x), y)
+        else expr
       case Typed(x, tpe)    => Typed.copy(expr)(recordSubValues(runtime, x), tpe)
       case Repeated(xs, y)  => Repeated.copy(expr)(xs.map(recordAllValues(runtime, _)), y)
       case _                => expr
@@ -198,6 +202,7 @@ class RecorderMacro(using qctx0: Quotes) {
         case sym if sym.isValDef => skipIdent(sym)
         case _ => true
       })
+    
     expr match {
       case Select(_, _) if skipSelect(expr.symbol) => expr
       case TypeApply(_, _) => expr
