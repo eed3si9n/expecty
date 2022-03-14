@@ -1,5 +1,5 @@
 val scalaJSVersion =
-  Option(System.getenv("SCALAJS_VERSION")).getOrElse("1.5.0")
+  Option(System.getenv("SCALAJS_VERSION")).getOrElse("1.5.1")
 
 // 0.4.0-M2's BigDecimal doesn't work https://github.com/scala-native/scala-native/issues/1770
 val scalaNativeVersion =
