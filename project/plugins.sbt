@@ -3,7 +3,7 @@ val scalaJSVersion =
 
 // 0.4.0-M2's BigDecimal doesn't work https://github.com/scala-native/scala-native/issues/1770
 val scalaNativeVersion =
-  Option(System.getenv("SCALANATIVE_VERSION")).getOrElse("0.4.0")
+  Option(System.getenv("SCALANATIVE_VERSION")).getOrElse("0.4.4")
 
 addSbtPlugin("com.geirsson" % "sbt-ci-release" % "1.5.5")
 addSbtPlugin("com.eed3si9n" % "sbt-projectmatrix" % "0.6.0")
