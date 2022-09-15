@@ -144,8 +144,8 @@ Instrumented AST: ${showRaw(instrumented)}")
       case Literal(_) => expr // don't record
       // don't record value of implicit "this" added by compiler; couldn't find a better way to detect implicit "this" than via point
       case Select(x @ This(_), y) if getPosition(expr).point == getPosition(x).point => expr
-      case x: Select if x.symbol.isModule                                            => expr // don't try to record the value of packages
-      case Apply(_, _) if expr.symbol.isImplicit                                     => recordSubValues(expr)
+      case x: Select if x.symbol.isModule        => expr // don't try to record the value of packages
+      case Apply(_, _) if expr.symbol.isImplicit => recordSubValues(expr)
       case _ =>
         val sub = recordSubValues(expr)
         val res = recordValue(sub, expr)

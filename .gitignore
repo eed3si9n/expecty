@@ -8,3 +8,5 @@ bin/
 *.ipr
 *.iws
 .bsp/
+.metals
+.vscode

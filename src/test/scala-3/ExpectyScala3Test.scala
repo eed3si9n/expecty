@@ -22,25 +22,23 @@ object ExpectyScala3Test extends verify.BasicTestSuite {
 
   val name = "Hi from Expecty!"
 
-   trait Eq[T]:
-     def eq(x: T, y: T): Boolean
+  trait Eq[T]:
+    def eq(x: T, y: T): Boolean
 
-   object Eq:
-     given Eq[Int] with
-       def eq(x: Int, y: Int) = (x - y) == 0
+  object Eq:
+    given Eq[Int] with
+      def eq(x: Int, y: Int) = (x - y) == 0
 
   test("scala 3 extension (1)") {
     // Regression test for https://github.com/eed3si9n/expecty/issues/50
-    extension [T](i: T)(using eq: Eq[T])
-      def ===(other: T) = eq.eq(i, other)
+    extension [T](i: T)(using eq: Eq[T]) def ===(other: T) = eq.eq(i, other)
 
     assert1("abc".length() === 3)
   }
 
   test("scala 3 extension (2)") {
     // Regression test for https://github.com/eed3si9n/expecty/issues/50
-    extension [T](i: T)
-      def ===(other: T)(using eq: Eq[T]) = eq.eq(i, other)
+    extension [T](i: T) def ===(other: T)(using eq: Eq[T]) = eq.eq(i, other)
 
     assert1("abc".length() === 3)
   }
@@ -69,4 +67,3 @@ object ExpectyScala3Test extends verify.BasicTestSuite {
     assert1(cats.data.Chain(1, 2, 3).size == 3)
   }
 }
-

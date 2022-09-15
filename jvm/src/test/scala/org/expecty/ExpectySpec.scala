@@ -61,7 +61,7 @@ class ExpectySpec {
     )
   }
 
-  //TODO: needs assertion
+  // TODO: needs assertion
   // @Test(expected = classOf[AssertionError])
   // def lateFailingExpectation(): Unit = {
   //   def expect = new Expecty(failEarly = false)
