@@ -66,4 +66,16 @@ object ExpectyScala3Test extends verify.BasicTestSuite {
   test("Capturing package names correctly") {
     assert1(cats.data.Chain(1, 2, 3).size == 3)
   }
+
+  test("working with inline and opaque types") {
+    val two: Foo = Foo.fromInt(2)
+    val three: Foo = Foo.fromInt(3)
+    val five: Foo = Foo.fromInt(5)
+    assert1(Foo.plus(two, three) == five)
+  }
 }
+
+opaque type Foo = Int
+object Foo:
+  inline def fromInt(x: Int): Foo = x
+  inline def plus(x: Foo, y: Foo): Foo = x + y
