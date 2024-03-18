@@ -72,13 +72,15 @@ object DiffUtil {
   }
 
   /**
-   * Return a colored diff between the tokens of every line in `expected` and `actual`. Each line of
-   * output contains the expected value on the left and the actual value on the right.
+   * Return a colored diff between the tokens of every line in `expected` and `actual`. Each line of output contains the
+   * expected value on the left and the actual value on the right.
    *
-   * @param expected The expected lines
-   * @param actual   The actual lines
-   * @return A string with one element of `expected` and `actual` on each lines, where
-   *         differences are highlighted.
+   * @param expected
+   *   The expected lines
+   * @param actual
+   *   The actual lines
+   * @return
+   *   A string with one element of `expected` and `actual` on each lines, where differences are highlighted.
    */
   def mkColoredLineDiff(expected: Seq[String], actual: Seq[String]): String = {
     val diffs =

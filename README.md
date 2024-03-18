@@ -19,7 +19,7 @@ libraryDependencies += "com.eed3si9n.expecty" %% "expecty" % "<version (see abov
 
 | Scala Version | JVM | JS (1.x) | Native (0.4.x) |
 | ------------- | :-: | :------: | :------------: |
-| 3.0           | ✅  |   ✅     |     n/a        |
+| 3.1.x         | ✅  |   ✅     |     ✅         |
 | 2.13.x        | ✅  |   ✅     |     ✅         |
 | 2.12.x        | ✅  |   ✅     |     ✅         |
 | 2.11.x        | ✅  |   ✅     |     ✅         |

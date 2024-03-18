@@ -1,16 +1,16 @@
 /*
-* Copyright 2012 the original author or authors.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*     http://www.apache.org/licenses/LICENSE-2.0
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2012 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.eed3si9n.expecty
 
 import scala.quoted._
@@ -23,12 +23,10 @@ class RecorderMacro(using qctx0: Quotes) {
 
   private[this] val runtimeSym: Symbol = TypeRepr.of[RecorderRuntime[_, _]].typeSymbol
 
-  def apply[A: Type, R: Type](
-      recordings: Seq[Expr[A]],
-      message: Expr[String],
-      listener: Expr[RecorderListener[A, R]])(using qctx0: Quotes): Expr[R] = {
+  def apply[A: Type, R: Type](recordings: Seq[Expr[A]], message: Expr[String], listener: Expr[RecorderListener[A, R]])(
+      using qctx0: Quotes
+  ): Expr[R] = {
     val termArgs: Seq[Term] = recordings.map(_.asTerm.underlyingArgument)
-
 
     '{
       val recorderRuntime: RecorderRuntime[A, R] = new RecorderRuntime($listener)
@@ -46,7 +44,8 @@ class RecorderMacro(using qctx0: Quotes) {
       expected: Expr[A],
       found: Expr[A],
       message: Expr[String],
-      listener: Expr[RecorderListener[A, R]]): Expr[R] = {
+      listener: Expr[RecorderListener[A, R]]
+  ): Expr[R] = {
     val expectedArg: Term = expected.asTerm.underlyingArgument
     val foundArg: Term = found.asTerm.underlyingArgument
 
@@ -56,7 +55,7 @@ class RecorderMacro(using qctx0: Quotes) {
       ${
         Block(
           recordExpressions('{ recorderRuntime }.asTerm, expectedArg) :::
-          recordExpressions('{ recorderRuntime }.asTerm, foundArg),
+            recordExpressions('{ recorderRuntime }.asTerm, foundArg),
           '{ recorderRuntime.completeRecording() }.asTerm
         ).asExprOf[R]
       }
@@ -66,22 +65,22 @@ class RecorderMacro(using qctx0: Quotes) {
   private[this] def getSourceLocation(expr: Tree) = {
     val pos = expr.pos
 
-    val pwd  = java.nio.file.Paths.get("").toAbsolutePath
+    val pwd = java.nio.file.Paths.get("").toAbsolutePath
     val line = Expr(pos.endLine)
 
     val path = pos.sourceFile.jpath
     // Comparing roots to avoid the windows-specific edge case of relativisation crashing
     // because the CWD and the source file are in two different drives (C:/ and D:/ for instance).
-    if (path != null && path.getRoot() == pwd.getRoot()){
+    if (path != null && path.getRoot() == pwd.getRoot()) {
       val file = path.toFile
 
       val pathExpr = Expr(path.toString)
       val relativePath = Expr(pwd.relativize(path).toString())
       val fileName = Expr(file.getName)
 
-      '{Location(${pathExpr}, ${relativePath}, ${line})}.asTerm
+      '{ Location(${ pathExpr }, ${ relativePath }, ${ line }) }.asTerm
     } else {
-      '{Location("<virtual>", "<virtual>", ${line})}.asTerm
+      '{ Location("<virtual>", "<virtual>", ${ line }) }.asTerm
     }
   }
 
@@ -100,8 +99,8 @@ class RecorderMacro(using qctx0: Quotes) {
         recordExpression(runtime, source, ast, recording, sourceLoc)
       )
     } catch {
-      case e: Throwable => throw new RuntimeException(
-        "Expecty: Error rewriting expression.\nText: " + source + "\nAST : " + ast, e)
+      case e: Throwable =>
+        throw new RuntimeException("Expecty: Error rewriting expression.\nText: " + source + "\nAST : " + ast, e)
     }
   }
 
@@ -112,22 +111,24 @@ class RecorderMacro(using qctx0: Quotes) {
       val m = runtimeSym.memberMethod("recordExpression").head
       runtime.select(m)
     }
-    Apply(recordExpressionSel,
+    Apply(
+      recordExpressionSel,
       List(
         Literal(StringConstant(source)),
         Literal(StringConstant(ast)),
         instrumented,
         loc
-      ))
+      )
+    )
   }
 
   private[this] def recordAllValues(runtime: Term, expr: Term): Term = {
     expr match {
-      case New(_)     => expr
-      case Literal(_) => expr
+      case New(_)                          => expr
+      case Literal(_)                      => expr
       case Typed(r @ Repeated(xs, y), tpe) => Typed.copy(r)(recordSubValues(runtime, r), tpe)
       // don't record value of implicit "this" added by compiler; couldn't find a better way to detect implicit "this" than via point
-      case Select(x@This(_), y) if expr.pos.start == x.pos.start => expr
+      case Select(x @ This(_), y) if expr.pos.start == x.pos.start => expr
       // case x: Select if x.symbol.isModule => expr // don't try to record the value of packages
       case _ => recordValue(runtime, recordSubValues(runtime, expr), expr)
     }
@@ -156,7 +157,7 @@ class RecorderMacro(using qctx0: Quotes) {
       case a @ Apply(x, ys) =>
         try {
 
-          if(ys.nonEmpty && ys.forall(isImplicitParameter))
+          if (ys.nonEmpty && ys.forall(isImplicitParameter))
             Apply(recordSubValues(runtime, x), ys)
           else
             Apply(recordSubValues(runtime, x), ys.map(recordAllValues(runtime, _)))
@@ -165,17 +166,17 @@ class RecorderMacro(using qctx0: Quotes) {
         }
       // case TypeApply(x, ys) => recordValue(TypeApply.copy(expr)(recordSubValues(x), ys), expr)
       case TypeApply(x, ys) => TypeApply.copy(expr)(recordSubValues(runtime, x), ys)
-      case Select(x, y)     => 
-        if(!x.symbol.flags.is(Flags.Package))
+      case Select(x, y) =>
+        if (!x.symbol.flags.is(Flags.Package))
           Select.copy(expr)(recordAllValues(runtime, x), y)
         else expr
-      case Typed(x, tpe)    => Typed.copy(expr)(recordSubValues(runtime, x), tpe)
-      case Repeated(xs, y)  => Repeated.copy(expr)(xs.map(recordAllValues(runtime, _)), y)
-      case _                => expr
+      case Typed(x, tpe)   => Typed.copy(expr)(recordSubValues(runtime, x), tpe)
+      case Repeated(xs, y) => Repeated.copy(expr)(xs.map(recordAllValues(runtime, _)), y)
+      case _               => expr
     }
   }
 
-  private[this] def isImplicitMethod(t : Apply): Boolean = {
+  private[this] def isImplicitMethod(t: Apply): Boolean = {
     t.symbol.flags.is(Flags.Implicit)
   }
 
@@ -191,10 +192,10 @@ class RecorderMacro(using qctx0: Quotes) {
         case sym if sym.isDefDef => sym.signature.paramSigs.nonEmpty
         case _ =>
           sym.fullName match {
-            case "scala" | "java" => true
+            case "scala" | "java"                          => true
             case fullName if fullName.startsWith("scala.") => true
             case fullName if fullName.startsWith("java.")  => true
-            case _ => false
+            case _                                         => false
           }
       }
 
@@ -202,14 +203,14 @@ class RecorderMacro(using qctx0: Quotes) {
       (sym match {
         case sym if sym.isDefDef => skipIdent(sym)
         case sym if sym.isValDef => skipIdent(sym)
-        case _ => true
+        case _                   => true
       })
-    
+
     expr match {
       case Select(_, _) if skipSelect(expr.symbol) => expr
-      case TypeApply(_, _) => expr
-      case Ident(_) if skipIdent(expr.symbol) => expr
-      case a @ Apply(_, _) if isImplicitMethod(a) => expr
+      case TypeApply(_, _)                         => expr
+      case Ident(_) if skipIdent(expr.symbol)      => expr
+      case a @ Apply(_, _) if isImplicitMethod(a)  => expr
       case _ =>
         val tapply = recordValueSel.appliedToType(expr.tpe)
         Apply.copy(expr)(
@@ -233,48 +234,46 @@ class RecorderMacro(using qctx0: Quotes) {
         getAnchor(ys.head)
       case Apply(x, ys)     => getAnchor(x) + 0
       case TypeApply(x, ys) => getAnchor(x) + 0
-      case Select(x, y)     =>
+      case Select(x, y) =>
         expr.pos.startColumn + math.max(0, expr.pos.sourceCode.get.indexOf(y))
-      case _                => expr.pos.startColumn
+      case _ => expr.pos.startColumn
     }
 }
 
 object RecorderMacro {
-  def apply[A: Type, R: Type](
-      recording: Expr[A],
-      listener: Expr[RecorderListener[A, R]])(using qctx: Quotes): Expr[R] =
-    new RecorderMacro().apply(Seq(recording), '{""}, listener)
+  def apply[A: Type, R: Type](recording: Expr[A], listener: Expr[RecorderListener[A, R]])(using qctx: Quotes): Expr[R] =
+    new RecorderMacro().apply(Seq(recording), '{ "" }, listener)
 
   /** captures a method invocation in the shape of assert(expr, message). */
-  def apply[A: Type, R: Type](
-      recording: Expr[A],
-      message: Expr[String],
-      listener: Expr[RecorderListener[A, R]])(using qctx: Quotes): Expr[R] =
+  def apply[A: Type, R: Type](recording: Expr[A], message: Expr[String], listener: Expr[RecorderListener[A, R]])(using
+      qctx: Quotes
+  ): Expr[R] =
     new RecorderMacro().apply(Seq(recording), message, listener)
 
-  def varargs[A: Type, R: Type](
-      recordings: Expr[Seq[A]],
-      listener: Expr[RecorderListener[A, R]])(using qctx: Quotes): Expr[R] = {
+  def varargs[A: Type, R: Type](recordings: Expr[Seq[A]], listener: Expr[RecorderListener[A, R]])(using
+      qctx: Quotes
+  ): Expr[R] = {
     import qctx.reflect._
-    //!\ only works because we're expecting the macro to expand `R*`
+    // !\ only works because we're expecting the macro to expand `R*`
     val Varargs(unTraversedRecordings) = recordings
-    new RecorderMacro().apply(unTraversedRecordings, '{""}, listener)
+    new RecorderMacro().apply(unTraversedRecordings, '{ "" }, listener)
   }
 }
 
 object StringRecorderMacro {
+
   /** captures a method invocation in the shape of assertEquals(expected, found). */
-  def apply[R: Type](
-      expected: Expr[String],
-      found: Expr[String],
-      listener: Expr[RecorderListener[String, R]])(using qctx: Quotes): Expr[R] =
-    new RecorderMacro().apply2[String, R](expected, found, '{""}, listener)
+  def apply[R: Type](expected: Expr[String], found: Expr[String], listener: Expr[RecorderListener[String, R]])(using
+      qctx: Quotes
+  ): Expr[R] =
+    new RecorderMacro().apply2[String, R](expected, found, '{ "" }, listener)
 
   /** captures a method invocation in the shape of assertEquals(expected, found). */
   def apply[R: Type](
       expected: Expr[String],
       found: Expr[String],
       message: Expr[String],
-      listener: Expr[RecorderListener[String, R]])(using qctx: Quotes): Expr[R] =
+      listener: Expr[RecorderListener[String, R]]
+  )(using qctx: Quotes): Expr[R] =
     new RecorderMacro().apply2[String, R](expected, found, message, listener)
 }
