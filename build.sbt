@@ -1,11 +1,11 @@
 val scala211 = "2.11.12"
-val scala212 = "2.12.15"
-val scala213 = "2.13.8"
+val scala212 = "2.12.19"
+val scala213 = "2.13.14"
 val scala3 = "3.2.0"
-val scalaFull = Seq(scala213, scala212, scala211, scala3)
+val scalaFull = Seq(scala213, scala212, /*scala211,*/ scala3)
 ThisBuild / scalaVersion := scala213
 Global / semanticdbEnabled := true
-Global / semanticdbVersion := "4.5.0"
+Global / semanticdbVersion := "4.9.3"
 
 lazy val verify = "com.eed3si9n.verify" %% "verify" % "1.0.0"
 

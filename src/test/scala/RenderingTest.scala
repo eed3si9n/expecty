@@ -34,7 +34,7 @@ object RenderingTest extends verify.BasicTestSuite {
   }
 
   test("List.apply") {
-    if (Compat.scala == "3.0" || Compat.scala == "2.13") {
+    if (Compat.scala == "3.0") {
       outputs("""assertion failed
 List() == List(1, 2)
 |      |  |
@@ -60,7 +60,7 @@ List() == List(1, 2)
   }
 
   test("List.apply2") {
-    if (Compat.scala == "3.0" || Compat.scala == "2.13") {
+    if (Compat.scala == "3.0") {
       outputs("""assertion failed
 List(1, 2) == List()
 |          |  |

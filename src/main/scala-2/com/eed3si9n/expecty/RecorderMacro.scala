@@ -126,9 +126,19 @@ Instrumented AST: ${showRaw(instrumented)}")
     """
     )
 
+    // to avoid missing interpolator lint, turn "a$b" into "a" + "$" + "b"
+    val cleanSource = {
+      val N = source.length - 1
+      source.indexOf('$') match {
+        case -1 | N => q"$source"
+        case _ =>
+          val parts = source.split('$').toList
+          parts.tail.foldLeft(q"${parts.head}")((t, s) => q"""$t + "$$" + $s""")
+      }
+    }
     Apply(
       Select(Ident(termName(context)("$com_eed3si9n_expecty_recorderRuntime")), termName(context)("recordExpression")),
-      List(q"$source", q"$ast", instrumented, getSourceLocation)
+      List(cleanSource, q"$ast", instrumented, getSourceLocation)
     )
   }
 
