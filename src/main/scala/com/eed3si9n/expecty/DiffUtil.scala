@@ -169,8 +169,30 @@ object DiffUtil {
   private final case class Deleted(str: String) extends Patch
   private final case class Inserted(str: String) extends Patch
 
+  private class PatchBuilder() {
+    private var lastVisited = Option.empty[Patch]
+    private val builder = Array.newBuilder[Patch]
+
+    def +=(patch: Patch) = (lastVisited, patch) match {
+      case (None, patch) =>
+        lastVisited = Some(patch)
+      case (Some(Deleted(a)), Deleted(b)) =>
+        lastVisited = Some(Deleted(a + b))
+      case (Some(Inserted(a)), Inserted(b)) =>
+        lastVisited = Some(Inserted(a + b))
+      case (Some(last), patch) =>
+        builder += last
+        lastVisited = Some(patch)
+    }
+
+    def result(): Array[Patch] = {
+      lastVisited.foreach(builder.+=)
+      builder.result()
+    }
+  }
+
   private def hirschberg(a: Array[String], b: Array[String]): Array[Patch] = {
-    def build(x: Array[String], y: Array[String], builder: mutable.ArrayBuilder[Patch]): Unit =
+    def build(x: Array[String], y: Array[String], builder: PatchBuilder): Unit =
       if (x.isEmpty)
         builder += Inserted(y.mkString)
       else if (y.isEmpty)
@@ -194,7 +216,7 @@ object DiffUtil {
         build(x1, y1, builder)
         build(x2, y2, builder)
       }
-    val builder = Array.newBuilder[Patch]
+    val builder = new PatchBuilder()
     build(a, b, builder)
     builder.result()
   }
@@ -219,7 +241,7 @@ object DiffUtil {
     Array.tabulate(y.length + 1)(j => score(x.length)(j))
   }
 
-  private def needlemanWunsch(x: Array[String], y: Array[String], builder: mutable.ArrayBuilder[Patch]): Unit = {
+  private def needlemanWunsch(x: Array[String], y: Array[String], builder: PatchBuilder): Unit = {
     def similarity(a: String, b: String) = if (a == b) 2 else -1
     val d = 1
     val score = Array.tabulate(x.length + 1, y.length + 1) { (i, j) =>
@@ -252,6 +274,6 @@ object DiffUtil {
       alignment = Inserted(y(j - 1)) :: alignment
       j = j - 1
     }
-    builder ++= alignment
+    alignment.foreach(builder += _)
   }
 }
