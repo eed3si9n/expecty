@@ -169,7 +169,7 @@ object DiffUtil {
   private final case class Deleted(str: String) extends Patch
   private final case class Inserted(str: String) extends Patch
 
-  private class PatchBuilder() {
+  private class PatchArrayBuilder() {
     private var lastVisited = Option.empty[Patch]
     private val builder = Array.newBuilder[Patch]
 
@@ -192,7 +192,7 @@ object DiffUtil {
   }
 
   private def hirschberg(a: Array[String], b: Array[String]): Array[Patch] = {
-    def build(x: Array[String], y: Array[String], builder: PatchBuilder): Unit =
+    def build(x: Array[String], y: Array[String], builder: PatchArrayBuilder): Unit =
       if (x.isEmpty)
         builder += Inserted(y.mkString)
       else if (y.isEmpty)
@@ -216,7 +216,7 @@ object DiffUtil {
         build(x1, y1, builder)
         build(x2, y2, builder)
       }
-    val builder = new PatchBuilder()
+    val builder = new PatchArrayBuilder()
     build(a, b, builder)
     builder.result()
   }
@@ -241,7 +241,7 @@ object DiffUtil {
     Array.tabulate(y.length + 1)(j => score(x.length)(j))
   }
 
-  private def needlemanWunsch(x: Array[String], y: Array[String], builder: PatchBuilder): Unit = {
+  private def needlemanWunsch(x: Array[String], y: Array[String], builder: PatchArrayBuilder): Unit = {
     def similarity(a: String, b: String) = if (a == b) 2 else -1
     val d = 1
     val score = Array.tabulate(x.length + 1, y.length + 1) { (i, j) =>
