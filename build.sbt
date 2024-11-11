@@ -1,13 +1,12 @@
-val scala211 = "2.11.12"
-val scala212 = "2.12.19"
-val scala213 = "2.13.14"
-val scala3 = "3.1.2"
-val scalaFull = Seq(scala213, scala212, /*scala211,*/ scala3)
+val scala212 = "2.12.20"
+val scala213 = "2.13.15"
+val scala3 = "3.3.4"
+val scalaFull = Seq(scala213, scala212, scala3)
+val verify = "1.0.0"
+
 ThisBuild / scalaVersion := scala213
 Global / semanticdbEnabled := true
-Global / semanticdbVersion := "4.9.3"
-
-lazy val verify = "com.eed3si9n.verify" %% "verify" % "1.0.0"
+Global / semanticdbVersion := "4.11.0"
 
 lazy val root = (project in file("."))
   .aggregate(expecty.projectRefs: _*)
@@ -32,7 +31,7 @@ lazy val expecty = (projectMatrix in file("."))
       case Some((2, _)) => Seq("org.scala-lang" % "scala-reflect" % scalaVersion.value)
       case _            => Nil
     }),
-    libraryDependencies += verify % Test,
+    libraryDependencies += "com.eed3si9n.verify" %%% "verify" % verify % Test,
     testFrameworks += new TestFramework("verify.runner.Framework"),
   )
   .jvmPlatform(
