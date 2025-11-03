@@ -5,15 +5,15 @@ on:
     tags: ["*"]
 jobs:
   publish:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v5
         with:
           java-version: 8
-          distribution: adopt
+          distribution: zulu
       - name: Release
         env:
           # define Java options for both official sbt and sbt-extras
