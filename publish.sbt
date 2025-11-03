@@ -7,11 +7,5 @@ ThisBuild / developers := List(
   Developer("eed3si9n", "Eugene Yokota", "@eed3si9n", url("https://github.com/eed3si9n")),
 )
 ThisBuild / description := "Power assertions (as known from Groovy and Spock) for the Scala language."
-ThisBuild / licenses := Seq("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
+ThisBuild / licenses := Seq(License.Apache2)
 ThisBuild / homepage := Some(url("https://github.com/eed3si9n/expecty"))
-
-ThisBuild / publishTo := {
-  val nexus = "https://oss.sonatype.org/"
-  if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
-  else Some("releases" at nexus + "service/local/staging/deploy/maven2")
-}
