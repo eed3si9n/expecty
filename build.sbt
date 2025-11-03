@@ -38,7 +38,10 @@ lazy val expecty = (projectMatrix in file("."))
     settings = Seq(
       libraryDependencies += "com.github.sbt" % "junit-interface" % "0.13.3" % Test,
       Test / unmanagedSourceDirectories ++= {
-        Seq((LocalRootProject / baseDirectory).value / "jvm" / "src" / "test" / "scala")
+        Seq(
+          (LocalRootProject / baseDirectory).value / "jvm" / "src" / "test" / "scala",
+          (LocalRootProject / baseDirectory).value / "jvm" / "src" / "test" / "java",
+        )
       },
     )
   )

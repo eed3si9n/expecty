@@ -166,15 +166,19 @@ class RecorderMacro(using qctx0: Quotes) {
         }
       // case TypeApply(x, ys) => recordValue(TypeApply.copy(expr)(recordSubValues(x), ys), expr)
       case TypeApply(x, ys) => TypeApply.copy(expr)(recordSubValues(runtime, x), ys)
-      case Select(x, y) =>
-        if (!x.symbol.flags.is(Flags.Package))
-          Select.copy(expr)(recordAllValues(runtime, x), y)
+      case sel @ Select(x, y) =>
+        if !x.symbol.flags.is(Flags.Package) && !isJavaEnum(x.symbol)
+          && !sel.symbol.flags.is(Flags.JavaStatic)
+        then Select.copy(expr)(recordAllValues(runtime, x), y)
         else expr
       case Typed(x, tpe)   => Typed.copy(expr)(recordSubValues(runtime, x), tpe)
       case Repeated(xs, y) => Repeated.copy(expr)(xs.map(recordAllValues(runtime, _)), y)
       case _               => expr
     }
   }
+
+  private def isJavaEnum(sym: Symbol): Boolean =
+    sym.flags.is(Flags.Enum) && sym.flags.is(Flags.JavaDefined)
 
   private[this] def isImplicitMethod(t: Apply): Boolean = {
     t.symbol.flags.is(Flags.Implicit)
