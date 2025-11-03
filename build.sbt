@@ -1,12 +1,12 @@
 val scala212 = "2.12.20"
-val scala213 = "2.13.15"
+val scala213 = "2.13.17"
 val scala3 = "3.3.7"
 val scalaFull = Seq(scala213, scala212, scala3)
 val verify = "1.0.0"
 
 ThisBuild / scalaVersion := scala213
 Global / semanticdbEnabled := true
-Global / semanticdbVersion := "4.11.0"
+Global / semanticdbVersion := "4.14.1"
 
 lazy val root = (project in file("."))
   .aggregate(expecty.projectRefs: _*)
