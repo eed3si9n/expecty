@@ -20,7 +20,6 @@ lazy val root = (project in file("."))
         "publishSigned" ::
         state
     },
-    sonatypeProfileName := "com.eed3si9n",
   )
 
 lazy val expecty = (projectMatrix in file("."))
