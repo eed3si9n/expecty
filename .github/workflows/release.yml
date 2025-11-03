@@ -2,7 +2,7 @@ name: Release
 on:
   push:
     branches: [develop]
-    tags: ["*"]
+    tags: ["**"]
 jobs:
   publish:
     runs-on: ubuntu-24.04
