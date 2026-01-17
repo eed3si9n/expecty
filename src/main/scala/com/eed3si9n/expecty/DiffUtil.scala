@@ -56,14 +56,14 @@ object DiffUtil {
 
     val exp = diffExp.collect {
       case Unmodified(str) => str
-      case Inserted(str) =>
+      case Inserted(str)   =>
         totalChange += str.length
         added(str)
     }.mkString
 
     val fnd = diffAct.collect {
       case Unmodified(str) => str
-      case Inserted(str) =>
+      case Inserted(str)   =>
         totalChange += str.length
         deleted(str)
     }.mkString
