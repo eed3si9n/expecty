@@ -131,7 +131,7 @@ Instrumented AST: ${showRaw(instrumented)}")
       val N = source.length - 1
       source.indexOf('$') match {
         case -1 | N => q"$source"
-        case _ =>
+        case _      =>
           val parts = source.split('$').toList
           parts.tail.foldLeft(q"${parts.head}")((t, s) => q"""$t + "$$" + $s""")
       }
@@ -156,7 +156,7 @@ Instrumented AST: ${showRaw(instrumented)}")
       case Select(x @ This(_), y) if getPosition(expr).point == getPosition(x).point => expr
       case x: Select if x.symbol.isModule        => expr // don't try to record the value of packages
       case Apply(_, _) if expr.symbol.isImplicit => recordSubValues(expr)
-      case _ =>
+      case _                                     =>
         val sub = recordSubValues(expr)
         val res = recordValue(sub, expr)
         res
@@ -200,7 +200,7 @@ Instrumented AST: ${showRaw(instrumented)}")
     expr match {
       case Apply(x, ys)     => getAnchor(x) + 0
       case TypeApply(x, ys) => getAnchor(x) + 0
-      case _ => {
+      case _                => {
         val pos = getPosition(expr)
         pos.point - pos.source.lineToOffset(pos.line - 1)
       }

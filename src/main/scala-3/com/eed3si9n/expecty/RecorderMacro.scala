@@ -165,7 +165,7 @@ class RecorderMacro(using qctx0: Quotes) {
           case e: AssertionError => expr
         }
       // case TypeApply(x, ys) => recordValue(TypeApply.copy(expr)(recordSubValues(x), ys), expr)
-      case TypeApply(x, ys) => TypeApply.copy(expr)(recordSubValues(runtime, x), ys)
+      case TypeApply(x, ys)   => TypeApply.copy(expr)(recordSubValues(runtime, x), ys)
       case sel @ Select(x, y) =>
         if !x.symbol.flags.is(Flags.Package) && !isJavaEnum(x.symbol)
           && !sel.symbol.flags.is(Flags.JavaStatic)
@@ -194,7 +194,7 @@ class RecorderMacro(using qctx0: Quotes) {
     def skipIdent(sym: Symbol): Boolean =
       sym match {
         case sym if sym.isDefDef => sym.signature.paramSigs.nonEmpty
-        case _ =>
+        case _                   =>
           sym.fullName match {
             case "scala" | "java"                          => true
             case fullName if fullName.startsWith("scala.") => true
@@ -215,7 +215,7 @@ class RecorderMacro(using qctx0: Quotes) {
       case TypeApply(_, _)                         => expr
       case Ident(_) if skipIdent(expr.symbol)      => expr
       case a @ Apply(_, _) if isImplicitMethod(a)  => expr
-      case _ =>
+      case _                                       =>
         val tapply = recordValueSel.appliedToType(expr.tpe)
         Apply.copy(expr)(
           tapply,
@@ -238,7 +238,7 @@ class RecorderMacro(using qctx0: Quotes) {
         getAnchor(ys.head)
       case Apply(x, ys)     => getAnchor(x) + 0
       case TypeApply(x, ys) => getAnchor(x) + 0
-      case Select(x, y) =>
+      case Select(x, y)     =>
         expr.pos.startColumn + math.max(0, expr.pos.sourceCode.get.indexOf(y))
       case _ => expr.pos.startColumn
     }
